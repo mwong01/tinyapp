@@ -9,8 +9,31 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
+
+function generateRandomString() {
+  let randStr = ' ';
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let charactersLength = characters.length;
+  for ( let i = 0; i < 6; i++ ) {
+     randStr += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return randStr;
+}
+
 app.get("/", (req, res) => {
   res.send("Hello!");
+});
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  console.log(generateRandomString());
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
 app.get("/urls", (req, res) => {
