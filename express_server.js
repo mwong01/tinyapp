@@ -21,8 +21,8 @@ function generateRandomString() {
   let randStr = '';
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let charactersLength = characters.length;
-  for ( let i = 0; i < 6; i++ ) {
-     randStr += characters.charAt(Math.floor(Math.random() * charactersLength));
+  for (let i = 0; i < 6; i++) {
+    randStr += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return randStr;
 }
@@ -86,15 +86,15 @@ app.post("/urls/:id", (req, res) => {
   urlDatabase[shortURL] = req.body.longURL;
   // console.log(req.body);
   res.redirect("/urls");
-})
+});
 
 app.post("/login", (req, res) => {
   console.log(req.body);
   res.cookie("username", req.body.username);
-  res.redirect("/urls")
-})
+  res.redirect("/urls");
+});
 
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
-})
+});
