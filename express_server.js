@@ -15,7 +15,6 @@ const urlDatabase = {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
-let templateVars = {};
 
 function generateRandomString() {
   let randStr = '';
@@ -32,6 +31,9 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
+  let templateVars = {
+    username: req.cookies.username
+  };
   res.render("urls_new", templateVars);
 });
 
@@ -45,12 +47,12 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  let templateVars = { urls: urlDatabase, username: req.cookies.username };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies["username"] };
+  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], username: req.cookies.username };
   res.render("urls_show", templateVars);
 });
 
