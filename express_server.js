@@ -4,6 +4,7 @@ const PORT = 8080; // default port 8080
 
 const cookieParser = require('cookie-parser');
 const createError = require('http-errors');
+const bcrypt = require('bcrypt');
 
 app.set("view engine", "ejs");
 app.use(cookieParser());
@@ -53,7 +54,7 @@ function generateRandomString() {
 //lookup if email is already registered
 function emailExists(email, password) {
   for (let id in users) {
-    if (users[id].email === email) {
+    if (users[id].email === email && users[id].password === password) {
       return id;
     }
   }
@@ -158,11 +159,12 @@ app.post("/urls/register", (req, res) => {
 
 app.post("/urls/login", (req, res) => {
   console.log('aaaaaaaaa', req.body);
-  if (emailExists(req.body.email)) {
-    res.cookie("user_id", emailExists(req.body.email));
+  if (emailExists(req.body.email, req.body.password)) {
+    res.cookie("user_id", emailExists(req.body.email, req.body.password));
     res.redirect("/urls");
   } else {
-    // res.redirect("/urls/register");
+    res.status(400);
+    res.send("Email or password incorrect.");
   }
 
 });
@@ -193,9 +195,9 @@ app.get("/urls.json", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL];
+  const longURL = urlDatabase[shortURL].longURL;
   // console.log(longURL);
-  // console.log(urlDatabase);
+  console.log(urlDatabase);
   res.redirect(longURL);
 });
 
