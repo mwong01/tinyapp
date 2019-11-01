@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 
 const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
@@ -12,15 +12,11 @@ app.use(cookieParser());
 app.use(cookieSession({
   name: 'session',
   keys: ["key1", "key2"],
-
-  // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  maxAge: 24 * 60 * 60 * 1000
 }));
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
   b6UTxQ: { longURL: "http://www.tsn.ca", userID: "aJ48lW" },
@@ -41,13 +37,18 @@ const users = {
   "aJ48lW": {
     id: "aJ48lW",
     email: "a@a.com",
-    password: "a"
+    password: bcrypt.hashSync("a", 10)
   }
 };
 
-const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
-
+// create helper function
+const getUserByEmail = function(email, database) {
+  for (let userID in database) {
+    if(database[userID].email === email) {
+      return database[userID]
+    }
+  }
+};
 
 function generateRandomString() {
   let randStr = '';
@@ -60,15 +61,10 @@ function generateRandomString() {
 }
 
 //lookup if email is already registered
-function emailExists(email, password) {
-  for (let id in users) {
-    const hashedPassword = bcrypt.hashSync(password, 10);
-    if (users[id].email === email && bcrypt.compareSync(users[id].password, hashedPassword)) {
-      return id;
-    }
-    console.log('passsword ----', bcrypt.hashSync(password, 10));
-  }
-  return null;
+function checkPassword(user, password) {
+  // console.log('check password', user, password)
+  // console.log('bcrypt----', bcrypt.compareSync(password, user.password));
+  return bcrypt.compareSync(password, user.password)
 }
 
 // check if url is for the registered user
@@ -157,7 +153,7 @@ app.post("/urls/register", (req, res) => {
   console.log('post users', users);
   if (req.body.email === "" || req.body.password === "") {
     res.send(createError(400, "Email or password not found"));
-  } else if (emailExists(req.body.email, req.body.password)) {
+  } else if (getUserByEmail(req.body.email, users)) {
     res.send(createError(400, "Email already exists."));
   } else {
     let id = uniqueUserId();
@@ -169,10 +165,12 @@ app.post("/urls/register", (req, res) => {
 });
 
 app.post("/urls/login", (req, res) => {
-  // console.log('aaaaaaaaa', req.body);
-  if (emailExists(req.body.email, req.body.password)) {
-    req.session.user_id = emailExists(req.body.email, req.body.password);
-    // res.cookie("user_id", emailExists(req.body.email, req.body.password));
+  console.log('aaaaaaaaa', req.body);
+
+  const user = getUserByEmail(req.body.email, users);
+  console.log('user-----', user);
+  if (user && checkPassword(user, req.body.password)) {
+    req.session.user_id = user.id
     res.redirect("/urls");
   } else {
     res.status(400);
