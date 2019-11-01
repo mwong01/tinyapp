@@ -54,9 +54,11 @@ function generateRandomString() {
 //lookup if email is already registered
 function emailExists(email, password) {
   for (let id in users) {
-    if (users[id].email === email && users[id].password === password) {
+    const hashedPassword = bcrypt.hashSync(password, 10)
+    if (users[id].email === email && bcrypt.compareSync(users[id].password, hashedPassword)) {
       return id;
     }
+    console.log('passsword ----', bcrypt.hashSync(password, 10))
   }
   return null;
 }
@@ -147,18 +149,19 @@ app.post("/urls/register", (req, res) => {
   console.log('post users', users);
   if (req.body.email === "" || req.body.password === "") {
     res.send(createError(400, "Email or password not found"));
-  } else if (emailExists(req.body.email)) {
+  } else if (emailExists(req.body.email, req.body.password)) {
     res.send(createError(400, "Email already exists."));
   } else {
     let id = uniqueUserId();
-    users[id] = { id: id, email: req.body.email, password: req.body.password };
+    users[id] = { id: id, email: req.body.email, password: bcrypt.hashSync(req.body.password, 10) };
+    // console.log(id, users[id]);
     res.cookie("user_id", id);
     res.redirect("/urls");
   }
 });
 
 app.post("/urls/login", (req, res) => {
-  console.log('aaaaaaaaa', req.body);
+  // console.log('aaaaaaaaa', req.body);
   if (emailExists(req.body.email, req.body.password)) {
     res.cookie("user_id", emailExists(req.body.email, req.body.password));
     res.redirect("/urls");
@@ -166,7 +169,7 @@ app.post("/urls/login", (req, res) => {
     res.status(400);
     res.send("Email or password incorrect.");
   }
-
+  
 });
 
 app.post("/logout", (req, res) => {
@@ -197,18 +200,17 @@ app.get("/u/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   // console.log(longURL);
-  console.log(urlDatabase);
+  // console.log(urlDatabase);
   res.redirect(longURL);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if(users === req.cookies.user_id) {
+  if(urlDatabase[req.params.shortURL].userID === req.cookies.user_id) {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
   } else {
-    res.redirect("/urls/login");
+    res.redirect("/urls");
   }
-  
 });
 
 app.post("/urls/:id", (req, res) => {
@@ -224,4 +226,3 @@ app.post("/urls/:id", (req, res) => {
   urlDatabase[shortURL] = req.body.longURL;
   // console.log(req.body);
 });
-
