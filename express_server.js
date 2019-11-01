@@ -15,7 +15,7 @@ app.use(cookieSession({
 
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+}));
 
 // const urlDatabase = {
 //   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -62,11 +62,11 @@ function generateRandomString() {
 //lookup if email is already registered
 function emailExists(email, password) {
   for (let id in users) {
-    const hashedPassword = bcrypt.hashSync(password, 10)
+    const hashedPassword = bcrypt.hashSync(password, 10);
     if (users[id].email === email && bcrypt.compareSync(users[id].password, hashedPassword)) {
       return id;
     }
-    console.log('passsword ----', bcrypt.hashSync(password, 10))
+    console.log('passsword ----', bcrypt.hashSync(password, 10));
   }
   return null;
 }
@@ -215,7 +215,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  if(urlDatabase[req.params.shortURL].userID === req.session.user_id) {
+  if (urlDatabase[req.params.shortURL].userID === req.session.user_id) {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
   } else {
@@ -225,8 +225,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 app.post("/urls/:id", (req, res) => {
   console.log(req.body);
-  if(users === req.session.user_id) {
-    urlDatabase = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL}
+  if (users === req.session.user_id) {
+    urlDatabase = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL};
     res.redirect("/urls");
   } else {
     res.redirect("/login");
