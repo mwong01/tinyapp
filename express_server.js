@@ -9,6 +9,7 @@ const bcrypt = require('bcrypt');
 
 const {getUserByEmail} = require('./helpers.js');
 const {uniqueUserId} = require('./helpers.js');
+const {generateRandomString} = require('./helpers.js');
 
 app.set("view engine", "ejs");
 app.use(cookieParser());
@@ -23,6 +24,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 const urlDatabase = {
   b6UTxQ: { longURL: "http://www.tsn.ca", userID: "aJ48lW" },
+  aAa123: { longURL: "http://www.amazon.com", userID: "aJ48lW" },
   i3BoGr: { longURL: "http://www.google.ca", userID: "userRandomID" }
 };
 
@@ -30,12 +32,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10)
   },
   "aJ48lW": {
     id: "aJ48lW",
@@ -44,21 +46,11 @@ const users = {
   }
 };
 
-function generateRandomString() {
-  let randStr = '';
-  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let charactersLength = characters.length;
-  for (let i = 0; i < 6; i++) {
-    randStr += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return randStr;
-}
-
 //lookup if email is already registered
 function checkPassword(user, password) {
   // console.log('check password', user, password)
   // console.log('bcrypt----', bcrypt.compareSync(password, user.password));
-  return bcrypt.compareSync(password, user.password)
+  return bcrypt.compareSync(password, user.password);
 }
 
 // check if url is for the registered user
@@ -77,7 +69,7 @@ function urlsForUser(id) {
 }
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/login");
 });
 
 app.get("/urls/new", (req, res) => {
@@ -88,7 +80,8 @@ app.get("/urls/new", (req, res) => {
     let templateVars = { username };
     res.render("urls_new", templateVars);
   } else {
-    res.redirect("/urls/login");
+    res.status(400);
+    res.send("User does not have permissions to change URL.");
   }
 });
 
@@ -105,33 +98,39 @@ app.get("/urls", (req, res) => {
   let username;
   if (users[userId]) {
     username = users[userId].email;
+    // console.log('username----->>>>>>>', username);
+    let templateVars = { urls: urlsForUser(userId), username};
+    res.render("urls_index", templateVars);
+    return
   }
-  // console.log('username----->>>>>>>', username);
-  let templateVars = { urls: urlsForUser(userId), username};
-  res.render("urls_index", templateVars);
+  res.redirect("/login");
 });
 
-app.get("/urls/register", (req, res) => {
+app.get("/register", (req, res) => {
   let userId = req.session.user_id;
   let username;
   if (users[userId]) {
     username = users[userId].email;
+    res.redirect("/urls");
+    return
   }
   let templateVars = { username };
   res.render("urls_register", templateVars);
 });
 
-app.get("/urls/login", (req, res) => {
+app.get("/login", (req, res) => {
   let userId = req.session.user_id;
   let username;
   if (users[userId]) {
     username = users[userId].email;
+    res.redirect("/urls");
+    return;
   }
   let templateVars = { username };
   res.render("urls_login", templateVars);
 });
 
-app.post("/urls/register", (req, res) => {
+app.post("/register", (req, res) => {
   // let users = { id: users.id, email: email, password: password };
   console.log('post users', users);
   if (req.body.email === "" || req.body.password === "") {
@@ -147,12 +146,12 @@ app.post("/urls/register", (req, res) => {
   }
 });
 
-app.post("/urls/login", (req, res) => {
+app.post("/login", (req, res) => {
   // console.log('aaaaaaaaa', req.body);
   const user = getUserByEmail(req.body.email, users);
   // console.log('user-----', user);
   if (user && checkPassword(user, req.body.password)) {
-    req.session.user_id = user.id
+    req.session.user_id = user.id;
     res.redirect("/urls");
   } else {
     res.status(400);
@@ -163,8 +162,8 @@ app.post("/urls/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  // res.clearCookie("user_id");
   res.redirect("/urls");
+  // res.clearCookie(session);
 });
 
 
@@ -173,6 +172,14 @@ app.get("/urls/:shortURL", (req, res) => {
   let username;
   if (users[userId]) {
     username = users[userId].email;
+  } else {
+    res.send("Please login or register to continue.")
+    return
+  }
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(400);
+    res.send("URL is not valid.");
+    return
   }
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, username };
   res.render("urls_show", templateVars);
@@ -187,11 +194,21 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL].longURL;
   // console.log(longURL);
   // console.log(urlDatabase);
-  res.redirect(longURL);
+  // res.redirect(longURL);
+  
+  if (urlDatabase[req.params.shortURL]) {
+    let longURL = urlDatabase[req.params.shortURL].longURL;
+    res.redirect(longURL)
+    return
+  } 
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(400);
+    res.send("URL is not valid.");
+    return
+  }
+
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
@@ -204,15 +221,15 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:id", (req, res) => {
+  const shortURL = req.params.id;
+  const longURL = urlDatabase[shortURL];
   console.log(req.body);
-  if (users === req.session.user_id) {
-    urlDatabase = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL};
+  if (longURL && longURL.userID === req.session.user_id) {
+    urlDatabase[shortURL].longURL = req.body.longURL;
     res.redirect("/urls");
+    return
   } else {
     res.redirect("/login");
   }
-  const shortURL = req.params.id;
-  const longURL = urlDatabase[shortURL];
-  urlDatabase[shortURL] = req.body.longURL;
   // console.log(req.body);
 });

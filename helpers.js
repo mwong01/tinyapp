@@ -1,5 +1,3 @@
-// Helper Functions
-
 const getUserByEmail = function(email, database) {
   for (let userID in database) {
     if(database[userID].email === email) {
@@ -18,7 +16,18 @@ function uniqueUserId() {
   return randStr;
 }
 
+function generateRandomString() {
+  let randStr = '';
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let charactersLength = characters.length;
+  for (let i = 0; i < 6; i++) {
+    randStr += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return randStr;
+}
+
 module.exports = { 
   getUserByEmail,
-  uniqueUserId
+  uniqueUserId,
+  generateRandomString
 }
