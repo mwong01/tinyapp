@@ -102,8 +102,9 @@ app.get("/urls", (req, res) => {
     let templateVars = { urls: urlsForUser(userId), username};
     res.render("urls_index", templateVars);
     return
+  } else {
+    res.redirect("/login");
   }
-  res.redirect("/login");
 });
 
 app.get("/register", (req, res) => {
@@ -216,14 +217,19 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
   } else {
-    res.redirect("/urls");
+    res.status(400);
+    res.send("User does not have permissions to change URL");
   }
 });
 
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
-  console.log(req.body);
+  // console.log(req.body);
+  // console.log(shortURL)
+  // if(!urlsForUser(req.session.user_id).shortURL) {
+  //   res.status(400).send("Not exist");
+  // }
   if (longURL && longURL.userID === req.session.user_id) {
     urlDatabase[shortURL].longURL = req.body.longURL;
     res.redirect("/urls");
