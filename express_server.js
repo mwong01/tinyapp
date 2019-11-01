@@ -7,6 +7,9 @@ const cookieSession = require('cookie-session');
 const createError = require('http-errors');
 const bcrypt = require('bcrypt');
 
+const {getUserByEmail} = require('./helpers.js');
+const {uniqueUserId} = require('./helpers.js');
+
 app.set("view engine", "ejs");
 app.use(cookieParser());
 app.use(cookieSession({
@@ -41,15 +44,6 @@ const users = {
   }
 };
 
-// create helper function
-const getUserByEmail = function(email, database) {
-  for (let userID in database) {
-    if(database[userID].email === email) {
-      return database[userID]
-    }
-  }
-};
-
 function generateRandomString() {
   let randStr = '';
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -80,17 +74,6 @@ function urlsForUser(id) {
     return false;
   }
   return userURLs;
-}
-
-//generate unique user id
-function uniqueUserId() {
-  let randStr = '';
-  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let charactersLength = characters.length;
-  for (let i = 0; i < 10; i++) {
-    randStr += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return randStr;
 }
 
 app.get("/", (req, res) => {
@@ -165,10 +148,9 @@ app.post("/urls/register", (req, res) => {
 });
 
 app.post("/urls/login", (req, res) => {
-  console.log('aaaaaaaaa', req.body);
-
+  // console.log('aaaaaaaaa', req.body);
   const user = getUserByEmail(req.body.email, users);
-  console.log('user-----', user);
+  // console.log('user-----', user);
   if (user && checkPassword(user, req.body.password)) {
     req.session.user_id = user.id
     res.redirect("/urls");
