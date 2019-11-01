@@ -101,7 +101,7 @@ app.get("/urls", (req, res) => {
     // console.log('username----->>>>>>>', username);
     let templateVars = { urls: urlsForUser(userId), username};
     res.render("urls_index", templateVars);
-    return
+    return;
   } else {
     res.redirect("/login");
   }
@@ -113,7 +113,7 @@ app.get("/register", (req, res) => {
   if (users[userId]) {
     username = users[userId].email;
     res.redirect("/urls");
-    return
+    return;
   }
   let templateVars = { username };
   res.render("urls_register", templateVars);
@@ -174,13 +174,13 @@ app.get("/urls/:shortURL", (req, res) => {
   if (users[userId]) {
     username = users[userId].email;
   } else {
-    res.send("Please login or register to continue.")
-    return
+    res.send("Please login or register to continue.");
+    return;
   }
   if (!urlDatabase[req.params.shortURL]) {
     res.status(400);
     res.send("URL is not valid.");
-    return
+    return;
   }
   let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, username };
   res.render("urls_show", templateVars);
@@ -201,13 +201,13 @@ app.get("/u/:shortURL", (req, res) => {
   
   if (urlDatabase[req.params.shortURL]) {
     let longURL = urlDatabase[req.params.shortURL].longURL;
-    res.redirect(longURL)
-    return
-  } 
+    res.redirect(longURL);
+    return;
+  }
   if (!urlDatabase[req.params.shortURL]) {
     res.status(400);
     res.send("URL is not valid.");
-    return
+    return;
   }
 
 });
@@ -233,7 +233,7 @@ app.post("/urls/:id", (req, res) => {
   if (longURL && longURL.userID === req.session.user_id) {
     urlDatabase[shortURL].longURL = req.body.longURL;
     res.redirect("/urls");
-    return
+    return;
   } else {
     res.redirect("/login");
   }
