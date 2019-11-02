@@ -77,8 +77,7 @@ app.get("/urls/new", (req, res) => {
     let templateVars = { username };
     res.render("urls_new", templateVars);
   } else {
-    res.status(400);
-    res.send("User does not have permissions to change URL.");
+    res.redirect("/login");
   }
 });
 
@@ -96,7 +95,9 @@ app.get("/urls", (req, res) => {
     res.render("urls_index", templateVars);
     return;
   } else {
-    res.redirect("/login");
+    // res.redirect("/login");
+    res.status(400);
+    res.send("User is not logged in.");
   }
 });
 
@@ -150,7 +151,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   req.session = null;
-  res.redirect("/urls");
+  res.redirect("/");
 });
 
 app.get("/urls/:shortURL", (req, res) => {
