@@ -146,14 +146,12 @@ app.post("/login", (req, res) => {
     res.status(400);
     res.send("Email or password incorrect.");
   }
-  
 });
 
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/urls");
 });
-
 
 app.get("/urls/:shortURL", (req, res) => {
   let userId = req.session.user_id;
