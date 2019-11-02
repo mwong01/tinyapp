@@ -4,8 +4,9 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["screenshot description"](#)
-!["screenshot description"](#)
+!["Screenshot of Login Page"](https://github.com/mwong01/tinyapp/blob/master/docs/urls-login-page.png)
+!["Screenshot of Create URL Page"](https://github.com/mwong01/tinyapp/blob/master/docs/urls-addnew-page.png)
+!["Screenshot of My URLs"](https://github.com/mwong01/tinyapp/blob/master/docs/urls-myurls-page.png)
 
 ## Dependencies
 
@@ -15,6 +16,12 @@ TinyApp is a full stack web application built with Node and Express that allows 
 - bcrypt
 - body-parser
 - cookie-session
+- createerror
+
+## devDependencies
+- Chai
+- Mocha
+- Nodemon
 
 ## Getting Started
 
