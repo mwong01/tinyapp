@@ -95,7 +95,6 @@ app.get("/urls", (req, res) => {
     res.render("urls_index", templateVars);
     return;
   } else {
-    // res.redirect("/login");
     res.status(400);
     res.send("User is not logged in.");
   }
@@ -207,11 +206,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const shortURL = req.params.id;
   const longURL = urlDatabase[shortURL];
-  // console.log(req.body);
-  // console.log(shortURL)
-  // if(!urlsForUser(req.session.user_id).shortURL) {
-  //   res.status(400).send("Not exist");
-  // }
   if (longURL && longURL.userID === req.session.user_id) {
     urlDatabase[shortURL].longURL = req.body.longURL;
     res.redirect("/urls");
