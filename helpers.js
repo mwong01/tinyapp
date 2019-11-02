@@ -6,6 +6,7 @@ const getUserByEmail = function(email, database) {
   }
 };
 
+// random user id generator 
 function uniqueUserId() {
   let randStr = '';
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -16,6 +17,7 @@ function uniqueUserId() {
   return randStr;
 }
 
+// random short url generator
 function generateRandomString() {
   let randStr = '';
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
